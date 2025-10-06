@@ -70,6 +70,14 @@ func logoutHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(map[string]any{"message": "Logged out successfully"})
 }
 
+func dflt(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+	json.NewEncoder(w).Encode(map[string]string{"message": "All Good!"})
+}
+
 func main() {
 	godotenv.Load()
 	port := os.Getenv("PORT")
@@ -85,6 +93,8 @@ func main() {
 		AllowedHeaders:   []string{"Content-Type", "Authorization", "X-CSRF-Token"},
 		AllowCredentials: true,
 	})
+
+	http.HandleFunc("/", );
 
 	http.HandleFunc("/login", users.Login)
 	http.HandleFunc("/signup", users.Signup)
@@ -102,3 +112,4 @@ func main() {
 	handlerCORS := c.Handler(http.DefaultServeMux)
 	log.Fatal(http.ListenAndServe(":"+port, handlerCORS))
 }
+
