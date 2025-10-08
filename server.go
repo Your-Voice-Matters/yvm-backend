@@ -70,9 +70,9 @@ func logoutHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(map[string]any{"message": "Logged out successfully"})
 }
 
-//handler for the '/' route - used for health checks
+// handler for the '/' route - used for health checks
 func dflt(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
+	if r.Method != http.MethodGet {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
@@ -95,7 +95,7 @@ func main() {
 		AllowCredentials: true,
 	})
 
-	http.HandleFunc("/", dflt);
+	http.HandleFunc("/", dflt)
 
 	http.HandleFunc("/login", users.Login)
 	http.HandleFunc("/signup", users.Signup)
@@ -113,5 +113,3 @@ func main() {
 	handlerCORS := c.Handler(http.DefaultServeMux)
 	log.Fatal(http.ListenAndServe(":"+port, handlerCORS))
 }
-
-
