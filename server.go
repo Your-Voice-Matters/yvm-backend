@@ -103,6 +103,7 @@ func main() {
 	http.HandleFunc("/get-token-details", helper.ChainMiddleware(verifyLoginToken, middleware.VerifyTokenMiddleware))
 	http.HandleFunc("/my-polls", helper.ChainMiddleware(polls.GetMyPolls, middleware.VerifyTokenMiddleware, middleware.VerifyCSRFtokens))
 	http.HandleFunc("/polls-i-participated-in", helper.ChainMiddleware(polls.GetPollsIParticipatedIn, middleware.VerifyTokenMiddleware, middleware.VerifyCSRFtokens))
+	http.HandleFunc("/most-popular-polls", polls.GetMostPopularPolls)
 	http.HandleFunc("/create-poll", helper.ChainMiddleware(polls.CreatePoll, middleware.VerifyTokenMiddleware, middleware.VerifyCSRFtokens))
 	http.HandleFunc("/has-voted", helper.ChainMiddleware(votes.HasVoted, middleware.VerifyTokenMiddleware, middleware.VerifyCSRFtokens))
 	http.HandleFunc("/cast-vote", helper.ChainMiddleware(votes.CastVote, middleware.VerifyTokenMiddleware, middleware.VerifyCSRFtokens))

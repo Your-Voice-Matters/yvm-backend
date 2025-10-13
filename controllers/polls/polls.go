@@ -27,16 +27,9 @@ func GetMyPolls(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	username := claims["username"].(string)
-	resp, _, err := services.Client.From("polls").Select("*", "exact", false).Eq("created_by", username).Execute()
-	if err != nil {
-		logger.Error("Error running the query for getting the list of polls", slog.String("error", err.Error()))
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(map[string]string{"message": "An unknown error occured"})
-		return
-	}
-
-	var polls []structs.PollObj
-	err = json.Unmarshal(resp, &polls)
+	resp := services.Client.Rpc("pollsICreated", "exact", map[string]string{"uname": username})
+	var polls []map[string]any
+	err := json.Unmarshal([]byte(resp), &polls)
 	if err != nil {
 		logger.Error("Error unmarshalling the response", slog.String("error", err.Error()))
 		w.WriteHeader(http.StatusInternalServerError)
@@ -109,7 +102,16 @@ func GetPollDetails(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(map[string]string{"message": "An unknown error occured"})
 		return
 	}
-	json.NewEncoder(w).Encode(polls[0])
+	resp = []byte(services.Client.Rpc("polloptioncounts", "exact", map[string]string{"pid": pollID}))
+	var optionCounts []map[string]any
+	err = json.Unmarshal(resp, &optionCounts)
+	if err != nil {
+		logger.Error("Error unmarshalling the response for option counts", slog.String("error", err.Error()))
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]string{"message": "An unknown error occured"})
+		return
+	}
+	json.NewEncoder(w).Encode(map[string]any{"poll": polls[0], "option_votes": optionCounts})
 }
 
 func GetPollsIParticipatedIn(w http.ResponseWriter, r *http.Request) {
@@ -131,6 +133,24 @@ func GetPollsIParticipatedIn(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		logger.Error("Error unmarshalling the response", slog.String("error", err.Error()))
 		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]string{"message": "An unknown error occured"})
+		return
+	}
+	json.NewEncoder(w).Encode(polls)
+}
+
+func GetMostPopularPolls(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	resp := services.Client.Rpc("mostPopularPolls", "exact", map[string]any{})
+	var polls []map[string]any
+	err := json.Unmarshal([]byte(resp), &polls)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		logger.Error("Error unmarshalling the response", slog.String("error", err.Error()))
 		json.NewEncoder(w).Encode(map[string]string{"message": "An unknown error occured"})
 		return
 	}
