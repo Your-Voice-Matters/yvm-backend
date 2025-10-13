@@ -50,7 +50,7 @@ func logoutHandler(w http.ResponseWriter, r *http.Request) {
 		Value:    "",
 		Path:     "/",
 		HttpOnly: true,
-		Secure:   false, // Set to true in production (HTTPS)
+		Secure:   true,
 		SameSite: http.SameSiteLaxMode,
 		MaxAge:   -1,
 	})
@@ -61,7 +61,7 @@ func logoutHandler(w http.ResponseWriter, r *http.Request) {
 		Value:    "",
 		Path:     "/",
 		HttpOnly: false,
-		Secure:   false,
+		Secure:   true,
 		SameSite: http.SameSiteLaxMode,
 		MaxAge:   -1,
 	})
