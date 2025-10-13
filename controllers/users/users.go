@@ -80,8 +80,8 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		Value:    token,
 		Path:     "/",
 		HttpOnly: true,
-		Secure:   false, // set true on HTTPS
-		SameSite: http.SameSiteLaxMode,
+		Secure:   true,
+		SameSite: http.SameSiteNoneMode,
 	})
 
 	// Set CSRF token cookie (accessible to JS)
@@ -90,8 +90,8 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		Value:    csrfToken,
 		Path:     "/",
 		HttpOnly: false,
-		Secure:   false, // set true on HTTPS
-		SameSite: http.SameSiteLaxMode,
+		Secure:   true,
+		SameSite: http.SameSiteNoneMode,
 	})
 
 	// Send minimal JSON response (without token)
