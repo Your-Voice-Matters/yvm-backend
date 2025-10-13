@@ -90,7 +90,7 @@ func main() {
 
 	c := cors.New(cors.Options{
 		// AllowedOrigins:   []string{"http://localhost:5173"},
-		AllowedOrigins:   []string{"https://yvm-frontend.vercel.app/"},
+		AllowedOrigins:   []string{"https://yvm-frontend1.vercel.app/"},
 		AllowedMethods:   []string{"GET", "POST"},
 		AllowedHeaders:   []string{"Content-Type", "Authorization", "X-CSRF-Token"},
 		AllowCredentials: true,
