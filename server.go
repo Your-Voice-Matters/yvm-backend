@@ -68,7 +68,7 @@ func main() {
 
 	c := cors.New(cors.Options{
 		// AllowedOrigins: []string{"http://localhost:5173"},
-		AllowedOrigins: []string{"https://yvm-frontend1.vercel.app"},
+		AllowedOrigins: []string{"https://yourvoicematters.netlify.app"},
 		AllowedMethods: []string{"GET", "POST"},
 		AllowedHeaders: []string{"Content-Type", "Authorization"},
 	})
@@ -88,7 +88,7 @@ func main() {
 	http.HandleFunc("/poll-details", polls.GetPollDetails)
 	http.HandleFunc("/logout", helper.ChainMiddleware(logoutHandler, middleware.VerifyTokenMiddleware))
 
-	fmt.Println("Server started at http://localhost:" + port)
+	fmt.Println("Server started at port:" + port)
 	handlerCORS := c.Handler(http.DefaultServeMux)
 	log.Fatal(http.ListenAndServe(":"+port, handlerCORS))
 }
