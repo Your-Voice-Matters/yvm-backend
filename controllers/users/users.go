@@ -10,7 +10,6 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
 
-	"yvm-backend/helper"
 	"yvm-backend/services"
 	"yvm-backend/structs"
 )
@@ -67,35 +66,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Generate CSRF token
-	csrfToken, err := helper.GenerateCSRFToken()
-	if err != nil {
-		http.Error(w, "Could not generate CSRF token", http.StatusInternalServerError)
-		return
-	}
-
-	// Set JWT token cookie (HttpOnly, Secure should be true in production HTTPS)
-	http.SetCookie(w, &http.Cookie{
-		Name:     "jwt_token",
-		Value:    token,
-		Path:     "/",
-		HttpOnly: true,
-		Secure:   true,
-		SameSite: http.SameSiteNoneMode,
-	})
-
-	// Set CSRF token cookie (accessible to JS)
-	http.SetCookie(w, &http.Cookie{
-		Name:     "csrf_token",
-		Value:    csrfToken,
-		Path:     "/",
-		HttpOnly: false,
-		Secure:   true,
-		SameSite: http.SameSiteNoneMode,
-	})
-
-	// Send minimal JSON response (without token)
-	json.NewEncoder(w).Encode(map[string]string{"message": "Logged in successfully", "username": creds.Username})
+	json.NewEncoder(w).Encode(map[string]string{"message": "Logged in successfully", "username": creds.Username, "token": token})
 }
 
 func Signup(w http.ResponseWriter, r *http.Request) {

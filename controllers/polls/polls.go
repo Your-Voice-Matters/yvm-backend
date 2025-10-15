@@ -27,7 +27,7 @@ func GetMyPolls(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	username := claims["username"].(string)
-	resp := services.Client.Rpc("pollsICreated", "exact", map[string]string{"uname": username})
+	resp := services.Client.Rpc("pollsicreated", "exact", map[string]string{"uname": username})
 	var polls []map[string]any
 	err := json.Unmarshal([]byte(resp), &polls)
 	if err != nil {

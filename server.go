@@ -44,28 +44,6 @@ func logoutHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Clear JWT cookie (HttpOnly)
-	http.SetCookie(w, &http.Cookie{
-		Name:     "jwt_token",
-		Value:    "",
-		Path:     "/",
-		HttpOnly: true,
-		Secure:   true,
-		SameSite: http.SameSiteNoneMode,
-		MaxAge:   -1,
-	})
-
-	// Clear CSRF cookie (assumes it's accessible via JS, so no HttpOnly)
-	http.SetCookie(w, &http.Cookie{
-		Name:     "csrf_token",
-		Value:    "",
-		Path:     "/",
-		HttpOnly: false,
-		Secure:   true,
-		SameSite: http.SameSiteNoneMode,
-		MaxAge:   -1,
-	})
-
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]any{"message": "Logged out successfully"})
 }
@@ -90,10 +68,9 @@ func main() {
 
 	c := cors.New(cors.Options{
 		// AllowedOrigins: []string{"http://localhost:5173"},
-		AllowedOrigins:   []string{"https://yvm-frontend1.vercel.app"},
-		AllowedMethods:   []string{"GET", "POST"},
-		AllowedHeaders:   []string{"Content-Type", "Authorization", "X-CSRF-Token"},
-		AllowCredentials: true,
+		AllowedOrigins: []string{"https://yvm-frontend1.vercel.app"},
+		AllowedMethods: []string{"GET", "POST"},
+		AllowedHeaders: []string{"Content-Type", "Authorization"},
 	})
 
 	http.HandleFunc("/", dflt)
@@ -102,14 +79,14 @@ func main() {
 	http.HandleFunc("/signup", users.Signup)
 
 	http.HandleFunc("/get-token-details", helper.ChainMiddleware(verifyLoginToken, middleware.VerifyTokenMiddleware))
-	http.HandleFunc("/my-polls", helper.ChainMiddleware(polls.GetMyPolls, middleware.VerifyTokenMiddleware, middleware.VerifyCSRFtokens))
-	http.HandleFunc("/polls-i-participated-in", helper.ChainMiddleware(polls.GetPollsIParticipatedIn, middleware.VerifyTokenMiddleware, middleware.VerifyCSRFtokens))
+	http.HandleFunc("/my-polls", helper.ChainMiddleware(polls.GetMyPolls, middleware.VerifyTokenMiddleware))
+	http.HandleFunc("/polls-i-participated-in", helper.ChainMiddleware(polls.GetPollsIParticipatedIn, middleware.VerifyTokenMiddleware))
 	http.HandleFunc("/most-popular-polls", polls.GetMostPopularPolls)
-	http.HandleFunc("/create-poll", helper.ChainMiddleware(polls.CreatePoll, middleware.VerifyTokenMiddleware, middleware.VerifyCSRFtokens))
-	http.HandleFunc("/has-voted", helper.ChainMiddleware(votes.HasVoted, middleware.VerifyTokenMiddleware, middleware.VerifyCSRFtokens))
-	http.HandleFunc("/cast-vote", helper.ChainMiddleware(votes.CastVote, middleware.VerifyTokenMiddleware, middleware.VerifyCSRFtokens))
+	http.HandleFunc("/create-poll", helper.ChainMiddleware(polls.CreatePoll, middleware.VerifyTokenMiddleware))
+	http.HandleFunc("/has-voted", helper.ChainMiddleware(votes.HasVoted, middleware.VerifyTokenMiddleware))
+	http.HandleFunc("/cast-vote", helper.ChainMiddleware(votes.CastVote, middleware.VerifyTokenMiddleware))
 	http.HandleFunc("/poll-details", polls.GetPollDetails)
-	http.HandleFunc("/logout", helper.ChainMiddleware(logoutHandler, middleware.VerifyTokenMiddleware, middleware.VerifyCSRFtokens))
+	http.HandleFunc("/logout", helper.ChainMiddleware(logoutHandler, middleware.VerifyTokenMiddleware))
 
 	fmt.Println("Server started at http://localhost:" + port)
 	handlerCORS := c.Handler(http.DefaultServeMux)
