@@ -11,21 +11,25 @@ import (
 // Context key type to avoid conflicts
 func VerifyTokenMiddleware(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		cookie, err := r.Cookie("jwt_token")
-		if err != nil {
-			http.Error(w, "No JWT token cookie", http.StatusUnauthorized)
+		auth_token := r.Header["Authorization"][0]
+		if auth_token == "" {
+			http.Error(w, "Authorization token missing", http.StatusUnauthorized)
 			return
 		}
-
-		token, err := jwt.Parse(cookie.Value, func(token *jwt.Token) (any, error) {
+		auth_token = auth_token[len("Bearer "):]
+		secret := os.Getenv("PASSPHRASE")
+		if secret == "" {
+			http.Error(w, "JWT secret not set", http.StatusInternalServerError)
+			return
+		}
+		token, err := jwt.Parse(auth_token, func(token *jwt.Token) (interface{}, error) {
 			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-				return nil, jwt.ErrSignatureInvalid
+				return nil, http.ErrAbortHandler
 			}
-			return []byte(os.Getenv("PASSPHRASE")), nil
+			return []byte(secret), nil
 		})
-
 		if err != nil || !token.Valid {
-			http.Error(w, "Invalid or expired token", http.StatusUnauthorized)
+			http.Error(w, "Invalid token", http.StatusUnauthorized)
 			return
 		}
 
