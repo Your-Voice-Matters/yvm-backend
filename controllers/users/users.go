@@ -7,8 +7,8 @@ import (
 	"os"
 	"time"
 
+	"github.com/alexedwards/argon2id"
 	"github.com/golang-jwt/jwt/v5"
-	"golang.org/x/crypto/bcrypt"
 
 	"yvm-backend/services"
 	"yvm-backend/structs"
@@ -47,8 +47,14 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(map[string]string{"message": "An unknown error occured"})
 		return
 	}
-	err = bcrypt.CompareHashAndPassword([]byte(users[0].Password), []byte(creds.Password))
+	match, err := argon2id.ComparePasswordAndHash(creds.Password, users[0].Password)
 	if err != nil {
+		logger.Error("Error comparing passwords", slog.String("error", err.Error()))
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]string{"message": "An unknown error occured"})
+		return
+	}
+	if !match {
 		w.WriteHeader(http.StatusUnauthorized)
 		json.NewEncoder(w).Encode(map[string]string{"message": "Invalid credentials"})
 		return
@@ -96,7 +102,7 @@ func Signup(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(creds.Password), 14)
+	hashedPassword, err := argon2id.CreateHash(creds.Password, argon2id.DefaultParams)
 	if err != nil {
 		logger.Error("Error hashing password", slog.String("error", err.Error()))
 		w.WriteHeader(http.StatusInternalServerError)
@@ -105,7 +111,7 @@ func Signup(w http.ResponseWriter, r *http.Request) {
 	}
 	_, _, err2 := services.Client.From("usercreds").Insert(map[string]any{
 		"username": creds.Username,
-		"password": string(hashedPassword),
+		"password": hashedPassword,
 	}, false, "", "", "exact").Execute()
 	if err2 != nil {
 		http.Error(w, "Error signing up user", http.StatusInternalServerError)

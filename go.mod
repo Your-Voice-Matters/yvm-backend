@@ -7,9 +7,9 @@ require github.com/lpernett/godotenv v0.0.0-20230527005122-0de1d4c5ef5e
 require github.com/golang-jwt/jwt/v5 v5.3.0
 
 require (
+	github.com/alexedwards/argon2id v1.0.0
 	github.com/rs/cors v1.11.1
 	github.com/supabase-community/supabase-go v0.0.4
-	golang.org/x/crypto v0.42.0
 )
 
 require (
@@ -19,4 +19,6 @@ require (
 	github.com/supabase-community/postgrest-go v0.0.11 // indirect
 	github.com/supabase-community/storage-go v0.7.0 // indirect
 	github.com/tomnomnom/linkheader v0.0.0-20180905144013-02ca5825eb80 // indirect
+	golang.org/x/crypto v0.42.0 // indirect
+	golang.org/x/sys v0.36.0 // indirect
 )
