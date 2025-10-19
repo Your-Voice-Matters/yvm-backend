@@ -30,7 +30,9 @@ func verifyLoginToken(w http.ResponseWriter, r *http.Request) {
 
 	claims, ok := r.Context().Value("options").(jwt.MapClaims)
 	if !ok {
-		http.Error(w, "No token claims found", http.StatusInternalServerError)
+		logger.Error("No token claims found in context")
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]any{"message": "An unknown error occurred"})
 		return
 	}
 
